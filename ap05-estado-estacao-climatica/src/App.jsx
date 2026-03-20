@@ -1,60 +1,96 @@
-import React from "react"
+// rafce
+//hook
+import React, { useState } from 'react'
 
-export default App = () => {
-  const [lat, setLat] = useState(null)
-  const [lon, setLon] = useState(null)
-  const [est, setEst] = useState(null)
+const App = () => {
+  const [latitude, setLatitude] = useState(null)
+  const [longitude, setLongitude] = useState(null)
+  const [estacao, setEstacao] = useState(null)
   const [data, setData] = useState(null)
   const [icone, setIcone] = useState(null)
-  const obterEstacao = (dataAtual, lat) =>{
+
+  const obterEstacao = (dataAtual, latitude) => {
     const ano = dataAtual.getFullYear()
-    const d1 = new Date(ano, 5, 21)
-    const d2 = new Date(ano, 8, 23)
-    const d3 = new Date(ano, 11, 22)
-    const d4 = new Date(ano, 2, 21)
+    const d1 = new Date(ano, 5, 21) //início do inverno/verão
+    const d2 = new Date(ano, 8, 23) //início da primavera/outono
+    const d3 = new Date(ano, 11, 22)//início do verão/inverno
+    const d4 = new Date(ano, 2, 21)//início do outono/primavera
     const sul = latitude < 0
-    if(dataAtual => d1 && dataAtual < d2)
-      return sul ? 'Inverno' : 'Verao'
-    if(dataAtual >= d1 && dataAtual <d3)
+    if(dataAtual >= d1 && dataAtual < d2)
+      return sul ? 'Inverno' : 'Verão'
+    if(dataAtual >= d2 && dataAtual < d3)
       return sul ? 'Primavera' : 'Outono'
-    if(dataAtual => d3 || dataAtual <4)
-      return sul ? 'Verao' : 'Outono'
+    if(dataAtual >= d3 || dataAtual < d4)
+      return sul ? 'Verão' : 'Inverno'
     return sul ? 'Outono' : 'Primavera'
-  
   }
-  
+
   const obterLocalizacao = () => {
-  
+    //consultar a localização do usuário, registrando uma função callback
+    //na função callback
+    //extrair a data do sistema
+    //obter a estação climática do usuário
+    //decidir qual é o ícone certo
+    //atualizar as variáveis de estado
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const dataAtual = new Date()
+        const estacao = obterEstacao(dataAtual, position.coords.latitude)
+        const icone = icones[estacao]
+        setLatitude(position.coords.latitude)
+        setLongitude(position.coords.longitude)
+        setEstacao(estacao)
+        setIcone(icone)
+      }, 
+      (err) => {
+        console.log(err)
+      }
+    )
   }
+
   const icones = {
-    'Outono' : 'leaf',
-    'Inverno' : 'snowflake',
-    'Verao' : 'sun',
-    'Primavera' : ''
-}
+    'Outono': 'leaf',
+    'Inverno': 'snowflake',
+    'Verão': 'sun',
+    'Primavera': 'seedling'
+  }
+  
   return (
-    <div className="container mt-2">
+    <div className='container mt-2'>
       <div className="row justify-content-center">
         <div className="col-12">
           <div className="card">
             <div className="card-body">
-              <div className="d-flex align-items-center rounded mb-2"
-              style={{height: 'rem'}}>
-                <i className={`fa-solid fa-5x fa-${icone}` }>
-                </i>
+              <div 
+                className="d-flex align-items-center border rounded mb-2 p-4"
+                style={{height: '6rem'}}>
+                  <i className={`fa-solid fa-4x fa-${icone}`}></i>
+                  {/* p.w-75.ms-3.text-center.fs-1 */}
+                  <p className="w-75 ms-3 text-center fs-1">{estacao}</p>
+
               </div>
               <div>
-                Daqui a pouco fazemos ...
+               <p className="text-center">
+                {
+                  latitude ?
+                   `Coordenadas: ${latitude},${longitude}. Data: ${data}` :
+                   'Clique no botão para saber a sua estação climatica'
+                }
+               </p>
               </div>
-              <button className="btn btn-outline-primary w-100 mt-2"
-              onClick={obterLocalizacao}>
-                Qual a minha estacao?
+              {/* button.btn.btn-outline-primary.w-100.mt-2 */}
+              <button 
+                onClick={obterLocalizacao}
+                className="btn btn-outline-primary w-100 mt-2">
+                Qual a minha estação?
               </button>
+
             </div>
           </div>
         </div>
-      </div>
-
+      </div>      
     </div>
   )
 }
+
+export default App
